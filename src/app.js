@@ -4,10 +4,26 @@ const app = express();
 //creates an instance of express, our router
 
 // this method will match only the HTTP GET API calls to /user
-app.get("/user", (req, res) => {
+app.get("/user/:userId", (req, res) => {
+    console.log(req.params);
+    // this will print the userId passed in the URL
+    // for example, if the URL is /user/123, then req.params will be { userId: '123' }
+    console.log(req.query);
+    // this will print the query parameters passed in the URL
+    // for example, if the URL is /user/123?name=John&age=25,
+    //  then req.query will be { name: 'John', age: '25' }
     res.send({
-        name: "Bhradwaj",
+        name: "Bharadwaj",
         age: 28,
+    });
+});
+
+
+// ab?c means b is optional, so it will match both /abc and /ac
+app.get("/abc", (req, res) => {
+    res.send({
+        name: "Vinay",
+        age: 25,
     });
 });
 
