@@ -14,7 +14,7 @@ app.get("/user/:userId", (req, res) => {
     //  then req.query will be { name: 'John', age: '25' }
     res.send({
         name: "Bharadwaj",
-        age: 28,
+        age: 29,
     });
 });
 
