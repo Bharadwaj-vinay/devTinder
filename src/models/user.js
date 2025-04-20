@@ -8,6 +8,7 @@ const userSchema = new Schema({
         type: String,
         required: true,
         minLength: 4, // Minimum length of 4 characters
+        maxLength: 50, // Maximum length of 50 characters
     },
     lastName: {
         type: String,

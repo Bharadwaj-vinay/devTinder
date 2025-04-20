@@ -3,20 +3,31 @@ const connectToDB = require('./config/database');
 
 const app = express();
 const User = require("./models/user");
+const {validateSignUpData} = require("./utils/validation");
+const bcrypt = require('bcrypt');
 
 app.use(express.json());
 // Middleware to parse JSON data from the request body
 
 app.post("/signup", async (req, res) => {
 
-
-  // creating a new instance of the User model with the current user data
-  const user = new User(req.body);
-
   try {
-    if (req.body.skills?.length > 10) {
-      throw new Error("Skills cannot be more than 10");
-    }
+    // Validate the request body
+    validateSignUpData(req);
+
+    const { firstName, lastName, emailId, password } = req.body;
+
+    //Encrypt the password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // creating a new instance of the User model with the current user data
+    const user = new User({
+      firstName,
+      lastName,
+      emailId,
+      password: hashedPassword,
+    });
+    
     // saving the user instance to the database 
     await user.save();
     res.send("User added successfully");
