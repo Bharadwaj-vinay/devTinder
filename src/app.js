@@ -9,10 +9,14 @@ app.use(express.json());
 
 app.post("/signup", async (req, res) => {
 
+
   // creating a new instance of the User model with the current user data
   const user = new User(req.body);
 
   try {
+    if (req.body.skills?.length > 10) {
+      throw new Error("Skills cannot be more than 10");
+    }
     // saving the user instance to the database 
     await user.save();
     res.send("User added successfully");
@@ -29,16 +33,16 @@ app.post("/signup", async (req, res) => {
 
 app.get('/user', async (req, res) => {
   try {
-    const user = await User.findOne({emailId: req.body.emailId});
-    res.send(user);
-    //const users = await User.find({emailId: req.body.emailId});
+    // const user = await User.findOne({emailId: req.body.emailId});
+    // res.send(user);
+    const users = await User.find({emailId: req.body.emailId});
 
-    // if  (!users.length) {
-    //   return res.status(404).send("User not found");
-    // } else {
-    //   // If user is found, send the user data as a response
-    //   res.send(users);
-    // }
+    if  (!users.length) {
+      return res.status(404).send("User not found");
+    } else {
+      // If user is found, send the user data as a response
+      res.send(users);
+    }
   } catch (error) {
     res.status(400).send("Error fetching user: " + error.message);
   }
@@ -54,8 +58,8 @@ app.get('/feed', async (req, res) => {
   }
 });
 
-app.delete('/user', async (req,res) => {
-  const userId = req.body.userId; 
+app.delete('/user/:userId', async (req,res) => {
+  const userId = req.params?.userId; 
   try {
     const user = await User.findByIdAndDelete(userId); 
     // If user is not found, send a 404 response
@@ -70,15 +74,34 @@ app.delete('/user', async (req,res) => {
   }
 });
 
-app.patch('/user', async (req, res) => {
+app.patch('/user/:userId', async (req, res) => {
   const data = req.body;
-  const userId = req.body.userId;
+  const userId = req.params?.userId;
+
+  const ALLOWED_UPDATES = [
+    'photoUrl', 'about', 'gender', 'age', 'skills', 'userId'
+  ];
 
   try {
-    await User.findByIdAndUpdate(userId, data);
+    const isUpdateAllowed = Object.keys(data).every((update) =>
+      ALLOWED_UPDATES.includes(update)
+    );
+    // Check if the update is allowed / API level validation
+    if (!isUpdateAllowed) {
+      throw new Error("Update not allowed");
+    }
+
+    if (data.skills?.length > 10) {
+      throw new Error("Skills cannot be more than 10");
+    }
+
+    await User.findByIdAndUpdate(userId, data, {
+      returnDocument: 'after', // Return the updated document, if 'bef
+      runValidators: true, // Validate the update against the schema
+    });
     res.send("User updated successfully");
   } catch (error) {
-    res.status(400).send("Something went wrong");
+    res.status(400).send("UPDATE FAILED: " + error.message);
   }
 });
 
