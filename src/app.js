@@ -5,6 +5,7 @@ const app = express();
 const User = require("./models/user");
 const {validateSignUpData} = require("./utils/validation");
 const bcrypt = require('bcrypt');
+const validator = require('validator');
 
 app.use(express.json());
 // Middleware to parse JSON data from the request body
@@ -39,6 +40,33 @@ app.post("/signup", async (req, res) => {
     // 403 - Forbidden
     // 404 - Not Found
     res.status(400).send("Error adding user: " + error.message);
+  }
+});
+
+app.post('/login', async (req, res) => {
+  try {
+    const { emailId, password } = req.body;
+
+    if (!validator.isEmail(emailId)) {
+      throw new Error("Invalid Credentials!");
+    }
+
+    // Find the user by emailId
+    const user = await User.findOne({ emailId });
+    if (!user) {
+      throw new Error("Invalid Credentials");
+    }
+
+    const isValidPassword = await bcrypt.compare(password, user.password);
+
+    if (isValidPassword) {
+      res.send("Login successful");
+    } else {
+      throw new Error("Invalid Credentials");
+    }
+     
+  } catch (error) {
+    res.status(400).send("ERROR : " + error.message);
   }
 });
 
