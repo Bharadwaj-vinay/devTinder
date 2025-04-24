@@ -6,9 +6,14 @@ const User = require("./models/user");
 const {validateSignUpData} = require("./utils/validation");
 const bcrypt = require('bcrypt');
 const validator = require('validator');
+const cookieParser = require('cookie-parser');
+const jwt = require('jsonwebtoken');
 
 app.use(express.json());
 // Middleware to parse JSON data from the request body
+
+app.use(cookieParser());
+// Middleware to parse cookies from the request headers
 
 app.post("/signup", async (req, res) => {
 
@@ -60,6 +65,17 @@ app.post('/login', async (req, res) => {
     const isValidPassword = await bcrypt.compare(password, user.password);
 
     if (isValidPassword) {
+      //create a JWT token
+
+      const token = jwt.sign({_id: user._id}, "DevTinderPractice");
+      //{_id: user._id} - payload - data to be encoded in the token
+      // "DevTinderPractice" - secret key - used to sign the token
+      // Secret key - secret key is something only the server should know
+
+      // Set the token in the cookie
+      res.cookie("token", token);
+
+      //Add the token to a cookie & send the response
       res.send("Login successful");
     } else {
       throw new Error("Invalid Credentials");
@@ -67,6 +83,35 @@ app.post('/login', async (req, res) => {
      
   } catch (error) {
     res.status(400).send("ERROR : " + error.message);
+  }
+});
+
+app.get('/profile', async (req, res) => {
+  try {
+    const cookies = req.cookies;
+    const { token } = cookies;
+    // Check if the token is present
+    if (!token) {
+      throw new Error("Invalid Token");
+    }
+
+    // Check if the token is valid
+    const decodedMessage = jwt.verify(token, "DevTinderPractice");
+    // to verify, you pass the same secret key that you signed the token with
+    // decodedMessage - data that was encoded in the token
+
+    const userId = decodedMessage._id;
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+    console.log(user);
+
+    res.send("user found");
+  } catch (error) {
+    res.status(400).send("ERROR: " + error.message);
   }
 });
 
