@@ -16,6 +16,9 @@ app.use(express.json());
 app.use(cookieParser());
 // Middleware to parse cookies from the request headers
 
+app.use(cookieParser());
+// Middleware to parse cookies from the request headers
+
 app.post("/signup", async (req, res) => {
 
   try {
