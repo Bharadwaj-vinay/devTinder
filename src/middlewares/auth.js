@@ -25,7 +25,7 @@ const userAuth = async (req, res, next) => {
 
     req.user = user;
     // attach the user to the request object this way, you can access the user
-    //  in the next middleware or route handler
+    // in the next middleware or route handler
     
     next();
     // if the user is found, call the next to move to the next middleware
