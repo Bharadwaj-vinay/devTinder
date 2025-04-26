@@ -1,13 +1,14 @@
-const express = require('express');
-const connectToDB = require('./config/database');
+const express = require("express");
+const connectToDB = require("./config/database");
 
 const app = express();
 const User = require("./models/user");
 const {validateSignUpData} = require("./utils/validation");
-const bcrypt = require('bcrypt');
-const validator = require('validator');
-const cookieParser = require('cookie-parser');
-const jwt = require('jsonwebtoken');
+const bcrypt = require("bcrypt");
+const validator = require("validator");
+const cookieParser = require("cookie-parser");
+const jwt = require("jsonwebtoken");
+const { userAuth } = require("./middlewares/auth");
 
 app.use(express.json());
 // Middleware to parse JSON data from the request body
@@ -67,13 +68,22 @@ app.post('/login', async (req, res) => {
     if (isValidPassword) {
       //create a JWT token
 
-      const token = jwt.sign({_id: user._id}, "DevTinderPractice");
+      const token = jwt.sign({_id: user._id}, "DevTinderPractice", {
+        expiresIn: "7d", // Token expiration time (1 day)
+      });
       //{_id: user._id} - payload - data to be encoded in the token
       // "DevTinderPractice" - secret key - used to sign the token
       // Secret key - secret key is something only the server should know
 
       // Set the token in the cookie
-      res.cookie("token", token);
+      res.cookie("token", token, {
+        expires: new Date(Date.now() + 24 * 60 * 60 * 1000), // Cookie expiration time (1 day)
+        //httpOnly: true, // Prevents client-side JavaScript from accessing the cookie
+        //secure: true, // Set to true if using HTTPS
+        //sameSite: "Strict", // Prevents CSRF attacks
+        //maxAge: 24 * 60 * 60 * 1000, // Cookie expiration time (1 day)
+      });
+      // this is how you set a cookie in the response
 
       //Add the token to a cookie & send the response
       res.send("Login successful");
@@ -86,30 +96,13 @@ app.post('/login', async (req, res) => {
   }
 });
 
-app.get('/profile', async (req, res) => {
+//you can pass multiple middlewares to a route in sequence
+app.get('/profile', userAuth, async (req, res) => {
   try {
-    const cookies = req.cookies;
-    const { token } = cookies;
-    // Check if the token is present
-    if (!token) {
-      throw new Error("Invalid Token");
-    }
+    const user = req.user;
+    // user is attached to the request object in the userAuth middleware
 
-    // Check if the token is valid
-    const decodedMessage = jwt.verify(token, "DevTinderPractice");
-    // to verify, you pass the same secret key that you signed the token with
-    // decodedMessage - data that was encoded in the token
-
-    const userId = decodedMessage._id;
-
-    const user = await User.findById(userId);
-
-    if (!user) {
-      throw new Error("User not found");
-    }
-    console.log(user);
-
-    res.send("user found");
+    res.send(user);
   } catch (error) {
     res.status(400).send("ERROR: " + error.message);
   }
@@ -180,7 +173,7 @@ app.patch('/user/:userId', async (req, res) => {
     }
 
     await User.findByIdAndUpdate(userId, data, {
-      returnDocument: 'after', // Return the updated document, if 'bef
+      returnDocument: 'after', // Return the updated document, if 'before' is used, it will return the document before the update
       runValidators: true, // Validate the update against the schema
     });
     res.send("User updated successfully");
