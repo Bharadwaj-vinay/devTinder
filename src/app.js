@@ -7,7 +7,6 @@ const {validateSignUpData} = require("./utils/validation");
 const bcrypt = require("bcrypt");
 const validator = require("validator");
 const cookieParser = require("cookie-parser");
-const jwt = require("jsonwebtoken");
 const { userAuth } = require("./middlewares/auth");
 
 app.use(express.json());
@@ -66,17 +65,14 @@ app.post('/login', async (req, res) => {
       throw new Error("Invalid Credentials");
     }
 
-    const isValidPassword = await bcrypt.compare(password, user.password);
+    const isValidPassword = await user.validatePassword(password);
+    // Validate the password using the method defined in the user schema
 
     if (isValidPassword) {
       //create a JWT token
 
-      const token = jwt.sign({_id: user._id}, "DevTinderPractice", {
-        expiresIn: "7d", // Token expiration time (1 day)
-      });
-      //{_id: user._id} - payload - data to be encoded in the token
-      // "DevTinderPractice" - secret key - used to sign the token
-      // Secret key - secret key is something only the server should know
+      const token = await user.getJWT();
+      // Generate a JWT token using the method defined in the user schema
 
       // Set the token in the cookie
       res.cookie("token", token, {

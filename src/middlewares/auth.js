@@ -1,5 +1,6 @@
-const jwt = require("jsonwebtoken");
 const User = require("../models/user");
+const jwt = require("jsonwebtoken"); 
+
 
 const userAuth = async (req, res, next) => {
    try {
@@ -29,7 +30,7 @@ const userAuth = async (req, res, next) => {
     next();
     // if the user is found, call the next to move to the next middleware
    } catch (error) {
-    res.status(400).send("ERROR: " + error.message);
+    res.status(400).send("ERROR1: " + error.message);
    }
 };
 

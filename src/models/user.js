@@ -1,5 +1,7 @@
-const mongoose = require('mongoose');
-const validator = require('validator');
+const mongoose = require("mongoose");
+const validator = require("validator");
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
 
 const { Schema } = mongoose;
 
@@ -66,5 +68,31 @@ const userSchema = new Schema({
 }, {
     timestamps: true, // Automatically add createdAt and updatedAt fields
 });
+
+// User schema methods cannot be used in arrow functions
+// Arrow functions do not have their own this binding, so they cannot be used as schema methods
+// schema methods work based on the instance of the model so  we need 'this' binding
+
+userSchema.methods.getJWT = async function () {
+    const user = this;
+    const token = await jwt.sign({ _id: user._id }, "DevTinderPractice", {
+        expiresIn: '7d'
+    });
+    //{_id: user._id} - payload - data to be encoded in the token
+    // "DevTinderPractice" - secret key - used to sign the token
+    // Secret key - secret key is something only the server should know
+    return token;
+};
+
+userSchema.methods.validatePassword = async function (passwordInputByUser) {
+    const user = this;
+    const passwordHash = user.password;
+    const isValidPassword = await bcrypt.compare(
+        passwordInputByUser,
+        passwordHash
+    );
+    
+    return isValidPassword;
+};
 
 module.exports = mongoose.model("User", userSchema);
