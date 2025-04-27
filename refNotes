@@ -1,0 +1,74 @@
+populate:
+
+In Mongoose, populate() is used to replace a referenced field in a document with the actual document(s) from the referenced collection. It is commonly used when you have relationships between collections in MongoDB.
+
+How populate() Works
+
+Referenced Field:
+
+If a field in a schema references another collection (using ref), Mongoose allows you to populate that field with the actual data from the referenced collection.
+
+What populate() Does:
+
+It performs an additional query to fetch the referenced document(s) and replaces the reference (e.g., an ObjectId) with the actual data.
+
+await ConnnectionRequest.find({
+            $or: [
+                { fromUserId: loggedInUser._id },
+                { toUserId: loggedInUser._id }
+            ]
+        }).populate('fromUserId toUserId', 'firstName lastName emailId');
+
+Explanation:
+
+fromUserId and toUserId:
+
+These fields are likely references to the User model (e.g., ref: 'User' in the ConnnectionRequest schema).
+populate() replaces the fromUserId and toUserId fields (which are ObjectIds) with the corresponding user documents from the User collection.
+
+Second Argument ('firstName lastName emailId'):
+
+Specifies which fields from the User documents should be included in the result.
+Only the firstName, lastName, and emailId fields will be included in the populated data.
+
+Result:
+
+Without populate():
+
+{
+  "fromUserId": "6449f8e2b7c3f2a1d8e4b123",
+  "toUserId": "6449f8e2b7c3f2a1d8e4b124"
+}
+
+{
+  "fromUserId": {
+    "firstName": "John",
+    "lastName": "Doe",
+    "emailId": "john.doe@example.com"
+  },
+  "toUserId": {
+    "firstName": "Jane",
+    "lastName": "Smith",
+    "emailId": "jane.smith@example.com"
+  }
+}
+
+When to Use populate()
+
+When you need to fetch related data from another collection.
+
+For example:
+Fetching user details for a connection request.
+Fetching comments for a blog post.
+
+Performance Consideration:
+
+populate() performs additional queries to fetch the referenced data, which can impact performance if overused.
+To optimize, avoid populating large datasets or unnecessary fields.
+
+
+
+{
+   "emailId": "akshay@gmail.com",
+    "password": "Namastejs@95"
+  }

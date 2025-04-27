@@ -5,7 +5,9 @@ const {Schema, model} = mongoose;
 const connectionRequestSchema = new Schema({
     fromUserId: {
         type: Schema.Types.ObjectId,
-        ref: "User",
+        ref: "User", // Reference to the User model
+        // The ref option is used to create a reference to another model
+        // This allows you to populate the field with data from the referenced model
         required: true,
     },
     toUserId: {
