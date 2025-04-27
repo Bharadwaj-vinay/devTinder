@@ -129,3 +129,5 @@ module.exports = mongoose.model("User", userSchema);
 mongoose.model():
 Creates a Mongoose model named "User" based on the userSchema.
 The model provides methods like create(), find(), findById(), etc., to interact with the User collection in MongoDB.
+
+The save() method returns a Promise that resolves to the saved document, including any modifications made by Mongoose or the database. It is commonly used to persist new documents or updates to the database.

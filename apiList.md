@@ -14,6 +14,10 @@ profileRouter
 connectionRequestRouter
 -POST /request/send/interested/:userId
 -POST /request/send/ignored/:userId
+
+above 2 are combined dynamically as 
+    /request/send/:status/:userId
+
 -POST /request/review/accepted/:requestId
 -POST /request/review/rejected/:requestId
 
