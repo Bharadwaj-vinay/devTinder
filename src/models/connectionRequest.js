@@ -40,6 +40,7 @@ connectionRequestSchema.pre("save", function (next) {
 connectionRequestSchema.index(
     { fromUserId: 1, toUserId: 1 },
 ); // TODO: Read about indexing in MongoDB
+
 // This creates a compound index on the fromUserId and toUserId fields, which can improve query performance when searching for connection requests between two users.
 // The index is created in ascending order for (1).
 // The index is created in descending order for (-1).
