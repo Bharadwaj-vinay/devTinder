@@ -48,9 +48,9 @@ connectionRequestSchema.index(
 // The index is created in descending order for (-1).
 
 
-const ConnnectionRequest = model(
+const ConnectionRequest = model(
     "ConnectionRequest",
     connectionRequestSchema
 );
 
-module.exports = ConnnectionRequest;
+module.exports = ConnectionRequest;

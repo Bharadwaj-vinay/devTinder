@@ -1,7 +1,7 @@
 
 const express = require("express");
 const { userAuth } = require("../middlewares/auth");
-const ConnnectionRequest = require("../models/connectionRequest");
+const ConnectionRequest = require("../models/connectionRequest");
 const User = require("../models/user");
 
 const userRouter = express.Router();
@@ -71,12 +71,20 @@ userRouter.get("/user/feed", userAuth, async (req, res) => {
         // his own and the users he has already connected with
         // ignored connections
         const loggedInUser = req.user;
-        const connections = await ConnnectionRequest.find({
+
+        const page = parseInt(req.query?.page) || 1;
+        let limit = parseInt(req.query?.limit) || 10;
+        limit = Math.min(limit, 50); // Limit the maximum number of users to 50
+
+        const skipValue = (page - 1) * limit;
+
+        const connections = await ConnectionRequest.find({
             $or: [
                 {toUserId: loggedInUser._id},
                 {fromUserId: loggedInUser._id}
             ]
-        }).select("fromUserId toUserId");
+        })
+        .select("fromUserId toUserId");
         // The select() method is used to specify which fields to include or exclude from the result set.
 
         const hideUsersFromFeed = new Set();
@@ -91,7 +99,11 @@ userRouter.get("/user/feed", userAuth, async (req, res) => {
                 {_id: {$nin: Array.from(hideUsersFromFeed)}}
             ]
         })
-        .select(USER_SAFE_FIELDS);
+        .select(USER_SAFE_FIELDS)
+        .skip(skipValue)
+        .limit(limit);
+        // The skip() method is used to skip the first n documents in the result set.
+        // The limit() method is used to limit the number of documents returned in the result set.  ;
         // The $ne operator is used to specify that the value of the field should not be equal to the specified value.
         // The $nin operator is used to specify that the value of the field should not be in the specified array.
 
