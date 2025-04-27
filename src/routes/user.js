@@ -2,8 +2,17 @@
 const express = require("express");
 const { userAuth } = require("../middlewares/auth");
 const ConnnectionRequest = require("../models/connectionRequest");
+const User = require("../models/user");
 
 const userRouter = express.Router();
+
+const USER_SAFE_FIELDS = [
+    "firstName",
+    "lastName",
+    "emailId",
+    "about",
+    "age",
+];
 
 // Get all the pending connection requests for the logged in user
 userRouter.get('/user/requests/received', userAuth, async (req, res) => {
@@ -28,5 +37,72 @@ userRouter.get('/user/requests/received', userAuth, async (req, res) => {
     }
 });
 
+userRouter.get("/user/connections", userAuth, async (req, res) => {
+    try {
+        const loggedInUser = req.user;
+        const connections = await ConnnectionRequest.find({
+            $or: [
+                {toUserId: loggedInUser._id, status: "accepted"},
+                {fromUserId: loggedInUser._id, status: "accepted"}
+            ]
+        })
+        .populate("fromUserId", USER_SAFE_FIELDS)
+        .populate("toUserId", USER_SAFE_FIELDS);
+
+        const data = connections.map((connection) => {
+            if (connection.fromUserId._id.toString() === loggedInUser._id.toString()) {
+                return connection.toUserId
+            } 
+            
+            return connection.fromUserId;
+        });
+
+        res.json({
+            data,
+        });
+    } catch (error) {
+        res.status(400).send("ERROR: " + error.message);
+    }
+});
+
+userRouter.get("/user/feed", userAuth, async (req, res) => {
+    try {
+        //User feed is a collection of all the users except
+        // his own and the users he has already connected with
+        // ignored connections
+        const loggedInUser = req.user;
+        const connections = await ConnnectionRequest.find({
+            $or: [
+                {toUserId: loggedInUser._id},
+                {fromUserId: loggedInUser._id}
+            ]
+        }).select("fromUserId toUserId");
+        // The select() method is used to specify which fields to include or exclude from the result set.
+
+        const hideUsersFromFeed = new Set();
+        connections.forEach(connection => {
+            hideUsersFromFeed.add(connection.toUserId.toString());
+            hideUsersFromFeed.add(connection.fromUserId.toString());
+        });
+
+        const users = await User.find({
+            $and: [
+                {_id: {$ne: loggedInUser._id}},
+                {_id: {$nin: Array.from(hideUsersFromFeed)}}
+            ]
+        })
+        .select(USER_SAFE_FIELDS);
+        // The $ne operator is used to specify that the value of the field should not be equal to the specified value.
+        // The $nin operator is used to specify that the value of the field should not be in the specified array.
+
+        res.json({
+            data: users
+        });
+    } catch (error) {
+        res.status(400).json({
+            message: "ERROR: " + error.message,
+        });
+    }
+});
 
 module.exports = userRouter;
