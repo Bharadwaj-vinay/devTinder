@@ -8,7 +8,7 @@ const userAuth = async (req, res, next) => {
    const token = req.cookies?.token;
 
     if (!token) {
-        throw new Error("Token not found!!");
+        return res.status(401).send("Please login to access this resource");
     }
 
    const decodedMessage = await jwt.verify(token, "DevTinderPractice");
