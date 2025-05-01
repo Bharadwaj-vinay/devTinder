@@ -2,8 +2,12 @@ const express = require("express");
 const connectToDB = require("./config/database");
 const app = express();
 const cookieParser = require("cookie-parser");
+const cors = require("cors");
 
-
+app.use(cors());
+// Middleware to enable CORS for all origins
+// This allows the server to accept requests from different origins
+// You can configure it further to restrict to specific origins if needed
 app.use(express.json());
 // Middleware to parse JSON data from the request body
 
