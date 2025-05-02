@@ -1,6 +1,6 @@
 const express = require("express");
 const { userAuth } = require("../middlewares/auth");
-const ConnnectionRequest = require("../models/connectionRequest");
+const ConnectionRequest = require("../models/connectionRequest");
 const User = require("../models/user");
 
 const requestRouter = express.Router();
@@ -46,7 +46,7 @@ requestRouter.post("/request/send/:status/:toUserId",
         }
 
         //create a new connection request object
-        const connectionRequest = new ConnnectionRequest({
+        const connectionRequest = new ConnectionRequest({
             fromUserId,
             toUserId,
             status
@@ -83,7 +83,7 @@ requestRouter.post("/request/review/:status/:requestId",
             //check if the requestId is valid
             // request is only valid if the loggedInUser is the toUserId, 
             // and the status is "interested"
-            const connectionRequest = await ConnnectionRequest.findOne({
+            const connectionRequest = await ConnectionRequest.findOne({
                 _id: requestId,
                 toUserId: loggedInUser._id,
                 status: "interested",
@@ -94,7 +94,6 @@ requestRouter.post("/request/review/:status/:requestId",
                     message: "Connection request not found or already reviewed",
                 });
             }
-``
             //update the status of the connection request
             connectionRequest.status = status;
             const data = await connectionRequest.save();
