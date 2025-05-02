@@ -4,7 +4,7 @@ const jwt = require("jsonwebtoken");
 
 const userAuth = async (req, res, next) => {
    try {
-    //read the token from thr request cookie
+    //read the token from the request cookie
    const token = req.cookies?.token;
 
     if (!token) {

@@ -12,6 +12,7 @@ const USER_SAFE_FIELDS = [
     "emailId",
     "about",
     "age",
+    "photoUrl",
 ];
 
 // Get all the pending connection requests for the logged in user
@@ -22,7 +23,7 @@ userRouter.get('/user/requests/received', userAuth, async (req, res) => {
             toUserId: loggedInUser._id,
             status: "interested"
         })
-        .populate("fromUserId", ["firstName", "lastName"]);
+        .populate("fromUserId", ["firstName", "lastName", "age", "photoUrl", "gender", "about"]);
         // The populate() method is used to replace the specified path in the document with documents from other collections.
         // The second argument specifies which fields to include in the populated documents.
         // Second argument can be space separated string of fields or an array of strings.
