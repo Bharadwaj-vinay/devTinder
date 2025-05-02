@@ -31,7 +31,7 @@ requestRouter.post("/request/send/:status/:toUserId",
         }
 
         // Check if the user is trying to send a request to an existing connection
-        const existingRequest = await ConnnectionRequest.findOne({
+        const existingRequest = await ConnectionRequest.findOne({
             $or: [
                 { fromUserId, toUserId }, // from user to to user
                 { fromUserId: toUserId, toUserId: fromUserId } // from to user to the fromz user

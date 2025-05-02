@@ -18,7 +18,7 @@ const USER_SAFE_FIELDS = [
 userRouter.get('/user/requests/received', userAuth, async (req, res) => {
     try {
         const loggedInUser = req.user;
-        const connectionRequests = await ConnnectionRequest.find({
+        const connectionRequests = await ConnectionRequest.find({
             toUserId: loggedInUser._id,
             status: "interested"
         })
@@ -40,7 +40,7 @@ userRouter.get('/user/requests/received', userAuth, async (req, res) => {
 userRouter.get("/user/connections", userAuth, async (req, res) => {
     try {
         const loggedInUser = req.user;
-        const connections = await ConnnectionRequest.find({
+        const connections = await ConnectionRequest.find({
             $or: [
                 {toUserId: loggedInUser._id, status: "accepted"},
                 {fromUserId: loggedInUser._id, status: "accepted"}
