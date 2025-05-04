@@ -4,6 +4,8 @@ const app = express();
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
 
+require("dotenv").config();
+
 app.use(cors({
   origin: "http://localhost:5173", // Replace with your frontend URL
   credentials: true, // Allow credentials (cookies, authorization headers, etc.)
@@ -31,8 +33,8 @@ app.use("/", userRouter);
 
 connectToDB().then(() => {
     console.log('Database Connection Established');
-    app.listen(7777, () => {
-        console.log('Server is running on port 7777');
+    app.listen(process.env.PORT, () => {
+        console.log('Server is running');
       });
     })
     .catch((err) => {

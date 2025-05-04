@@ -79,7 +79,7 @@ const userSchema = new Schema({
 
 userSchema.methods.getJWT = async function () {
     const user = this;
-    const token = await jwt.sign({ _id: user._id }, "DevTinderPractice", {
+    const token = await jwt.sign({ _id: user._id }, process.env.JWT_SECRET_KEY, {
         expiresIn: '7d'
     });
     //{_id: user._id} - payload - data to be encoded in the token
