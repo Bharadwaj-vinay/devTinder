@@ -6,6 +6,8 @@ const cors = require("cors");
 
 require("dotenv").config();
 
+require("./utils/cronjob"); // Import the cron job file to start the cron job
+
 app.use(cors({
   origin: "http://localhost:5173", // Replace with your frontend URL
   credentials: true, // Allow credentials (cookies, authorization headers, etc.)
