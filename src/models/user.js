@@ -69,6 +69,13 @@ const userSchema = new Schema({
     skills: {
         type: [String], // Array of strings
     },
+    isPremium: {
+        type: Boolean,
+        default: false,
+    },
+    memebershipType: {
+        type: String,
+    }
 }, {
     timestamps: true, // Automatically add createdAt and updatedAt fields
 });
